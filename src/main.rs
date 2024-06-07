@@ -1,4 +1,4 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, http::header::ContentType, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -17,7 +17,9 @@ async fn catalog(query: web::Query<QueryParams>) -> impl Responder {
     .text()
     .await.unwrap();
 
-    HttpResponse::Ok().body(body)
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(body)
 }
 
 #[get("/")]
