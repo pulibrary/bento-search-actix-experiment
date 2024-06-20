@@ -1,5 +1,7 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, http::header::ContentType, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
+
+mod catalog_request;
 
 #[derive(Deserialize)]
 struct QueryParams {
@@ -8,16 +10,10 @@ struct QueryParams {
 
 #[get("/catalog")]
 async fn catalog(query: web::Query<QueryParams>) -> impl Responder {
-    let catalog_url = format!(
-        "https://catalog.princeton.edu/catalog.json?utf8=%E2%9C%93&search_field=all_fields&q={}",
-        query.query
-    );
-    let body = reqwest::get(catalog_url)
-    .await.unwrap()
-    .text()
-    .await.unwrap();
-
-    HttpResponse::Ok().body(body)
+    let body: String = catalog_request::catalog_response_body(&query.query).await;
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(body)
 }
 
 #[get("/")]
